@@ -60,22 +60,54 @@ def siguiente_Ajuste(espacios_Memoria, tamano_Proceso): #Funcion del algoritmo d
             print(f"Procesando: {proceso[0]} ({proceso[1]} KB)")
             print(f"No se pudo asignar el proceso {proceso[0]} de {proceso[1]} KB")
 
+def agregar_Espacio_Memoria(espacio_Memoria, estado_Memoria):
+    tamano = int(input("Ingrese el tamaño del nuevo espacio de memoria en KB: "))
+    estado = input("Ingrese el estado del nuevo espacio de memoria (disponible/ocupado): ")
+    ubicacion = input("Ingrese la ubicación del nuevo espacio de memoria (inicio/final): ").lower()
+
+    if ubicacion == "inicio":
+        espacio_Memoria.insert(0, tamano)
+        estado_Memoria.insert(0, estado)
+    elif ubicacion == "final":
+        espacio_Memoria.append(tamano)
+        estado_Memoria.append(estado)
+    else:
+        print("Ubicación no válida. El espacio de memoria no se ha agregado.")
+
+    print(f"Espacio de memoria de {tamano} KB con estado '{estado}' agregado con éxito en la ubicación {ubicacion}.")
+
+def imprimir_Estado_Memoria(espacio_Memoria, estado_Memoria):
+    print("\nEstado actual de la memoria:\n")
+    for i in range(len(espacio_Memoria)):
+        if espacio_Memoria[i] == 0:
+            estado_Memoria[i] = 'ocupado'
+        print(f"Espacio {i}: {espacio_Memoria[i]} KB ({estado_Memoria[i]})")
+
+
 #Espacios de memoria para los algoritmos
-espacio_Memoria1 = [1000, 400, 1800, 700, 900, 1200, 1500]
-espacio_Memoria2 = [1000, 400, 1800, 700, 900, 1200, 1500]
-espacio_Memoria3 = [1000, 400, 1800, 700, 900, 1200, 1500]
-espacio_Memoria4 = [1000, 400, 1800, 700, 900, 1200, 1500]
+espacio_Memoria_original = [1000, 400, 1800, 700, 900, 1200, 1500]
+estado_Memoria_original = ['disponible'] * len(espacio_Memoria_original)
+
+espacio_Memoria1 = espacio_Memoria_original.copy()
+estado_Memoria1 = estado_Memoria_original.copy()
+espacio_Memoria2 = espacio_Memoria_original.copy()
+estado_Memoria2 = estado_Memoria_original.copy()
+espacio_Memoria3 = espacio_Memoria_original.copy()
+estado_Memoria3 = estado_Memoria_original.copy()
+espacio_Memoria4 = espacio_Memoria_original.copy()
+estado_Memoria4 = estado_Memoria_original.copy()
 
 #Menu del programa
 while True:
     print("\n\tMenu\n")
-    print("Espacio de Memoria: [1000, 400, 1800, 700, 900, 1200, 1500]\n")
     print("Selecciona un algoritmo de asignación de memoria:")
     print("1. Mejor Ajuste")
     print("2. Primer Ajuste")
     print("3. Peor Ajuste")
     print("4. Siguiente Ajuste")
-    print("5. Salir")
+    print("5. Agregar Espacio de Memoria")
+    print("6. Ver Espacios de Memoria")
+    print("7. Salir")
 
     opcion = input("Ingresa el número de la opción deseada: ")
 
@@ -91,10 +123,7 @@ while True:
             print(f"Procesando: {proceso} ({tamano_Proceso} KB)")
             mejor_Ajuste(tamano_Proceso, espacio_Memoria1, procesos_en_Memoria)
 
-        # Estado actual de la memoria después de asignar procesos
-        print("\n\tEstado actual de la memoria:\n")
-        for i in range(len(espacio_Memoria1)):
-            print(f"Espacio {i}: {espacio_Memoria1[i]} KB")
+        imprimir_Estado_Memoria(espacio_Memoria1, estado_Memoria1)
 
     elif opcion == '2':
         print("\n\tPrimer Ajuste\n")
@@ -112,10 +141,7 @@ while True:
             if not primer_Ajuste(tamano, espacio_Memoria2):
                 print(f"Proceso {proceso}: Tamaño {tamano} KB no hay suficiente espacio en la memoria")
         
-        # Estado actual de la memoria después de asignar procesos
-        print("\n\tEstado actual de la memoria:\n")
-        for i in range(len(espacio_Memoria2)):
-            print(f"Espacio {i}: {espacio_Memoria2[i]} KB")
+        imprimir_Estado_Memoria(espacio_Memoria2, estado_Memoria2)
 
     elif opcion == '3':
         print("\n\tPeor Ajuste\n")
@@ -131,10 +157,7 @@ while True:
 
         peor_Ajuste(espacio_Memoria3, procesos_en_Memoria)
 
-        # Estado actual de la memoria después de asignar procesos
-        print("\n\tEstado actual de la memoria:\n")
-        for i in range(len(espacio_Memoria3)):
-            print(f"Espacio {i}: {espacio_Memoria3[i]} KB")
+        imprimir_Estado_Memoria(espacio_Memoria3, estado_Memoria3)
 
     elif opcion == '4':
         print("\n\tSiguiente Ajuste\n")
@@ -150,12 +173,63 @@ while True:
 
         siguiente_Ajuste(espacio_Memoria4, procesos_en_Memoria)
 
-        # Estado actual de la memoria después de asignar procesos
-        print("\n\tEstado actual de la memoria:\n")
-        for i in range(len(espacio_Memoria4)):
-            print(f"Espacio {i}: {espacio_Memoria4[i]} KB")
+        imprimir_Estado_Memoria(espacio_Memoria4, estado_Memoria4)
 
     elif opcion == '5':
+        while True:
+            print("\n\tAgregar Espacios de Memoria\n")
+            print("1. Mejor Ajuste")
+            print("2. Primer Ajuste")
+            print("3. Mejor Ajuste")
+            print("4. Siguiente Ajuste")
+            print("5. Salir")
+
+            opcion = input("Ingresa el número de la opción deseada: ")
+            if opcion == '1':
+                print("\n\tMejor Ajuste\n")
+                agregar_Espacio_Memoria(espacio_Memoria1, estado_Memoria1)
+            elif opcion == '2':
+                print("\n\tPrimer Ajuste\n")
+                agregar_Espacio_Memoria(espacio_Memoria2, estado_Memoria2)
+            elif opcion == '3':
+                print("\n\tPeor Ajuste\n")
+                agregar_Espacio_Memoria(espacio_Memoria3, estado_Memoria3)
+            elif opcion == '4':
+                print("\n\tSiguiente Ajuste\n")
+                agregar_Espacio_Memoria(espacio_Memoria4, estado_Memoria4)
+            elif opcion == '5':
+                break
+            else:
+                print("Opción no válida. Por favor, elige una opción válida.")
+
+    elif opcion == '6':
+        while True:
+                print("\n\tVer Espacios de Memoria\n")
+                print("1. Mejor Ajuste")
+                print("2. Primer Ajuste")
+                print("3. Mejor Ajuste")
+                print("4. Siguiente Ajuste")
+                print("5. Salir")
+
+                opcion = input("Ingresa el número de la opción deseada: ")
+                if opcion == '1':
+                    print("\n\tMejor Ajuste")
+                    imprimir_Estado_Memoria(espacio_Memoria1, estado_Memoria1)
+                elif opcion == '2':
+                    print("\n\tPrimer Ajuste")
+                    imprimir_Estado_Memoria(espacio_Memoria2, estado_Memoria2)
+                elif opcion == '3':
+                    print("\n\tPeor Ajuste")
+                    imprimir_Estado_Memoria(espacio_Memoria3, estado_Memoria3)
+                elif opcion == '4':
+                    print("\n\tSiguiente Ajuste")
+                    imprimir_Estado_Memoria(espacio_Memoria4, estado_Memoria4)
+                elif opcion == '5':
+                    break
+                else:
+                    print("Opción no válida. Por favor, elige una opción válida.")
+
+    elif opcion == '7':
         break
     else:
         print("Opción no válida. Por favor, elige una opción válida.")
