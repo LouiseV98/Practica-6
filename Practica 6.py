@@ -1,11 +1,13 @@
+import os
+
 lista_Archivos = []
 
-def mejor_Ajuste(tamano_Proceso, espacio_Memoria, procesos_Memoria):    #Funcion del algoritmo del mejor ajuste
+def mejor_Ajuste(tamano_Proceso, espacio_Memoria, procesos_Memoria, estado_Memoria):    #Funcion del algoritmo del mejor ajuste
     mejor_Ajuste_Idx = -1
     espacio_Libre = float('inf')
 
     for i in range(len(espacio_Memoria)):
-        if espacio_Memoria[i] >= tamano_Proceso and espacio_Memoria[i] - tamano_Proceso < espacio_Libre:
+        if espacio_Memoria[i] >= tamano_Proceso and estado_Memoria[i] == 'disponible' and espacio_Memoria[i] - tamano_Proceso < espacio_Libre:
             mejor_Ajuste_Idx = i
             espacio_Libre = espacio_Memoria[i] - tamano_Proceso
 
@@ -16,21 +18,21 @@ def mejor_Ajuste(tamano_Proceso, espacio_Memoria, procesos_Memoria):    #Funcion
     else:
         print(f"Proceso {proceso}: Tamaño {tamano_Proceso} KB no hay suficiente espacio en la memoria")
 
-def primer_Ajuste(tamano_Proceso, espacios_Memoria):    #Funcion del algoritmo del primer ajuste
+def primer_Ajuste(tamano_Proceso, espacios_Memoria, estado_Memoria):    #Funcion del algoritmo del primer ajuste
     for i in range(len(espacios_Memoria)):
-        if espacios_Memoria[i] >= tamano_Proceso:
+        if espacios_Memoria[i] >= tamano_Proceso and estado_Memoria[i] == 'disponible':
             print(f"Proceso de {tamano_Proceso} KB asignado al espacio {i}")
             espacios_Memoria[i] -= tamano_Proceso
             return True
     return False
 
-def peor_Ajuste(espacios_Memoria, tamano_Proceso):  #Funcion del algoritmo del peor ajuste
+def peor_Ajuste(espacios_Memoria, tamano_Proceso, estado_Memoria):  #Funcion del algoritmo del peor ajuste
     for proceso in tamano_Proceso:
         peor_Ajuste_Index = -1
         peor_Ajuste_Tamano = -1
 
         for i in range(len(espacios_Memoria)):
-            if espacios_Memoria[i] >= proceso[1]:
+            if espacios_Memoria[i] >= proceso[1] and estado_Memoria[i] == 'disponible':
                 if peor_Ajuste_Index == -1 or espacios_Memoria[i] > espacios_Memoria[peor_Ajuste_Index]:
                     peor_Ajuste_Index = i
                     peor_Ajuste_Tamano = espacios_Memoria[i]
@@ -43,14 +45,14 @@ def peor_Ajuste(espacios_Memoria, tamano_Proceso):  #Funcion del algoritmo del p
             print(f"Procesando: {proceso[0]} ({proceso[1]} KB)")
             print(f"Proceso {proceso[0]}: Tamaño {proceso[1]} KB no hay suficiente espacio en la memoria")
 
-def siguiente_Ajuste(espacios_Memoria, tamano_Proceso): #Funcion del algoritmo del siguiente ajuste
+def siguiente_Ajuste(espacios_Memoria, tamano_Proceso, estado_Memoria): #Funcion del algoritmo del siguiente ajuste
     ultimo_Indice_Asignado = 0
 
     for proceso in tamano_Proceso:
         proceso_Asignado = False
 
         for i in range(ultimo_Indice_Asignado, len(espacios_Memoria)):
-            if espacios_Memoria[i] >= proceso[1]:
+            if espacios_Memoria[i] >= proceso[1] and estado_Memoria[i] == 'disponible':
                 espacios_Memoria[i] -= proceso[1]
                 print(f"Procesando: {proceso[0]} ({proceso[1]} KB)")
                 print(f"Proceso de {proceso[1]} KB asignado en el espacio {i}")
@@ -115,6 +117,38 @@ def agregar_Archivos_Virtuales(lista_Archivos):
         for proceso in lista_Archivos:
             archivo.write(f"{proceso[0]}, {proceso[1]}kb\n")
 
+def agregar_Archivos_Fisicos(lista_Archivos):
+    carpeta = os.path.dirname(os.path.abspath(__file__))
+
+    nombre_Carpeta = input("\nIngrese el nombre de la carpeta o presione enter para usar la carpeta raiz: ")
+    print("")
+
+    ruta_Carpeta = os.path.join(carpeta, nombre_Carpeta)
+
+    if os.path.isdir(ruta_Carpeta):
+        archivos = os.listdir(ruta_Carpeta)
+        print("\n\t",nombre_Carpeta,"\n")
+        for archivo in archivos:
+            ruta_archivo = os.path.join(ruta_Carpeta, archivo)
+            
+            if os.path.isfile(ruta_archivo):
+                tamaño_bytes = os.path.getsize(ruta_archivo)
+                tamaño_kb = tamaño_bytes / 1024
+                print(f"Archivo: {archivo}, Tamaño en KB: {tamaño_kb:.2f} KB")
+
+                respuesta = input("¿Desea agregar este archivo a la lista de archivos (S/N)? ").strip().lower()
+                if respuesta == "s":
+                    nuevo_Archivo = (archivo, int(tamaño_kb))
+                    lista_Archivos.append(nuevo_Archivo)
+
+        with open("archivos.txt", "a") as archivo:  # Abre el archivo en modo de agregado
+            for proceso in lista_Archivos:
+                archivo.write(f"{proceso[0]}, {proceso[1]}kb\n")
+        print("Archivos agregados al archivo 'archivos.txt' con éxito.")
+
+    else:
+        print(f"{ruta_Carpeta} no es una carpeta válida.")
+
 lista_de_Archivos = "archivos.txt"
 #Espacios de memoria para los algoritmos
 espacio_Memoria_original = [1000, 400, 1800, 700, 900, 1200, 1500]
@@ -154,7 +188,7 @@ while True:
             proceso, tamano = linea.strip().split(', ')
             tamano_Proceso = int(tamano.rstrip('kb'))
             print(f"Procesando: {proceso} ({tamano_Proceso} KB)")
-            mejor_Ajuste(tamano_Proceso, espacio_Memoria1, procesos_en_Memoria)
+            mejor_Ajuste(tamano_Proceso, espacio_Memoria1, procesos_en_Memoria, estado_Memoria1)
 
         imprimir_Estado_Memoria(espacio_Memoria1, estado_Memoria1)
 
@@ -171,7 +205,7 @@ while True:
             
         for proceso, tamano in procesos_en_Memoria:
             print(f"Procesando: {proceso} ({tamano} KB)")
-            if not primer_Ajuste(tamano, espacio_Memoria2):
+            if not primer_Ajuste(tamano, espacio_Memoria2, estado_Memoria2):
                 print(f"Proceso {proceso}: Tamaño {tamano} KB no hay suficiente espacio en la memoria")
         
         imprimir_Estado_Memoria(espacio_Memoria2, estado_Memoria2)
@@ -188,7 +222,7 @@ while True:
             tamano_Proceso = int(proceso[1].rstrip("kb"))
             procesos_en_Memoria.append((nombre_Proceso, tamano_Proceso))
 
-        peor_Ajuste(espacio_Memoria3, procesos_en_Memoria)
+        peor_Ajuste(espacio_Memoria3, procesos_en_Memoria, estado_Memoria3)
 
         imprimir_Estado_Memoria(espacio_Memoria3, estado_Memoria3)
 
@@ -204,7 +238,7 @@ while True:
             tamano_Proceso = int(proceso[1].rstrip("kb"))
             procesos_en_Memoria.append((nombre_Proceso, tamano_Proceso))
 
-        siguiente_Ajuste(espacio_Memoria4, procesos_en_Memoria)
+        siguiente_Ajuste(espacio_Memoria4, procesos_en_Memoria, estado_Memoria4)
 
         imprimir_Estado_Memoria(espacio_Memoria4, estado_Memoria4)
 
@@ -213,7 +247,7 @@ while True:
             print("\n\tAgregar Espacios de Memoria\n")
             print("1. Mejor Ajuste")
             print("2. Primer Ajuste")
-            print("3. Mejor Ajuste")
+            print("3. Peor Ajuste")
             print("4. Siguiente Ajuste")
             print("5. Salir")
 
@@ -240,7 +274,7 @@ while True:
                 print("\n\tVer Espacios de Memoria\n")
                 print("1. Mejor Ajuste")
                 print("2. Primer Ajuste")
-                print("3. Mejor Ajuste")
+                print("3. Peor Ajuste")
                 print("4. Siguiente Ajuste")
                 print("5. Salir")
 
@@ -272,12 +306,14 @@ while True:
                 opcion = input("Ingresa el número de la opcion deseada: ")
                 if opcion == '1':
                     print("\n\tAgregar archivos Fisicos")
-
-                if opcion == '2':
+                    agregar_Archivos_Fisicos(lista_Archivos)
+                elif opcion == '2':
                     print("\n\tAgregar archivos Virtuales")
                     agregar_Archivos_Virtuales(lista_de_Archivos)
-                if opcion == '3':
+                elif opcion == '3':
                     break
+                else:
+                    print("Opción no válida. Por favor, elige una opción válida.")
 
     elif opcion == '8':
         break
