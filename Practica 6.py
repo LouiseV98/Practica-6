@@ -1,3 +1,5 @@
+lista_Archivos = []
+
 def mejor_Ajuste(tamano_Proceso, espacio_Memoria, procesos_Memoria):    #Funcion del algoritmo del mejor ajuste
     mejor_Ajuste_Idx = -1
     espacio_Libre = float('inf')
@@ -83,7 +85,37 @@ def imprimir_Estado_Memoria(espacio_Memoria, estado_Memoria):
             estado_Memoria[i] = 'ocupado'
         print(f"Espacio {i}: {espacio_Memoria[i]} KB ({estado_Memoria[i]})")
 
+def cargar_Archivos(nombre_Archivo):
+    procesos_en_Memoria = []
 
+    with open(nombre_Archivo, "r") as archivo:
+        lineas = archivo.readlines()
+
+    for linea in lineas:
+        proceso, tamano = linea.strip().split(', ')
+        tamano_Proceso = int(tamano.rstrip('kb'))
+        procesos_en_Memoria.append((proceso,int(tamano_Proceso)))
+
+    return procesos_en_Memoria
+
+def agregar_Archivos_Virtuales(lista_Archivos):
+    nombre = input("Nombre del archivo: ")
+    peso = int(input("Peso del archivo en KB: "))
+    posicion = input("¿Desea agregar al inicio o al final?(P/A): ").strip().lower()
+
+    nuevo_Archivo = (nombre, peso)
+    lista_Archivos = cargar_Archivos(lista_de_Archivos)
+
+    if posicion.lower() == "p":
+        lista_Archivos.insert(0, nuevo_Archivo) #Agregar el nuevo proceso al principio de la lista global
+    else:
+        lista_Archivos.append(nuevo_Archivo)
+
+    with open(lista_de_Archivos, "w") as archivo:    #Sobrescribir el archivo con la lista actualizada de procesos
+        for proceso in lista_Archivos:
+            archivo.write(f"{proceso[0]}, {proceso[1]}kb\n")
+
+lista_de_Archivos = "archivos.txt"
 #Espacios de memoria para los algoritmos
 espacio_Memoria_original = [1000, 400, 1800, 700, 900, 1200, 1500]
 estado_Memoria_original = ['disponible'] * len(espacio_Memoria_original)
@@ -107,7 +139,8 @@ while True:
     print("4. Siguiente Ajuste")
     print("5. Agregar Espacio de Memoria")
     print("6. Ver Espacios de Memoria")
-    print("7. Salir")
+    print("7. Agregar nuevos archivos")
+    print("8. Salir")
 
     opcion = input("Ingresa el número de la opción deseada: ")
 
@@ -119,7 +152,7 @@ while True:
         procesos_en_Memoria = []
         for linea in lineas:
             proceso, tamano = linea.strip().split(', ')
-            tamano_Proceso = int(tamano.replace('kb', ''))
+            tamano_Proceso = int(tamano.rstrip('kb'))
             print(f"Procesando: {proceso} ({tamano_Proceso} KB)")
             mejor_Ajuste(tamano_Proceso, espacio_Memoria1, procesos_en_Memoria)
 
@@ -152,7 +185,7 @@ while True:
         for linea in lineas:
             proceso = linea.strip().split(", ")
             nombre_Proceso = proceso[0]
-            tamano_Proceso = int(proceso[1].replace("kb", ""))
+            tamano_Proceso = int(proceso[1].rstrip("kb"))
             procesos_en_Memoria.append((nombre_Proceso, tamano_Proceso))
 
         peor_Ajuste(espacio_Memoria3, procesos_en_Memoria)
@@ -168,7 +201,7 @@ while True:
         for linea in lineas:
             proceso = linea.strip().split(", ")
             nombre_Proceso = proceso[0]
-            tamano_Proceso = int(proceso[1].replace("kb", ""))
+            tamano_Proceso = int(proceso[1].rstrip("kb"))
             procesos_en_Memoria.append((nombre_Proceso, tamano_Proceso))
 
         siguiente_Ajuste(espacio_Memoria4, procesos_en_Memoria)
@@ -228,8 +261,25 @@ while True:
                     break
                 else:
                     print("Opción no válida. Por favor, elige una opción válida.")
-
+    
     elif opcion == '7':
+        while True:
+                print("\n\tAgregar nuevos Archivos\n")
+                print("1. Fisicos")
+                print("2. Virtuales")
+                print("3. Salir")
+
+                opcion = input("Ingresa el número de la opcion deseada: ")
+                if opcion == '1':
+                    print("\n\tAgregar archivos Fisicos")
+
+                if opcion == '2':
+                    print("\n\tAgregar archivos Virtuales")
+                    agregar_Archivos_Virtuales(lista_de_Archivos)
+                if opcion == '3':
+                    break
+
+    elif opcion == '8':
         break
     else:
         print("Opción no válida. Por favor, elige una opción válida.")
